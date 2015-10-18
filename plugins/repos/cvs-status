@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Date::Parse;
+
+if (!@ARGV || $ARGV[0] ne '-u') {
+    my @cvsdirs = qw( CVS );
+    my @changes;
+    while (@cvsdirs) {
+	my $dir = shift @cvsdirs;
+	open ENTRIES, "$dir/Entries" or die "Unable to open $dir/Entries: $!";
+	my $path = $dir;
+	$path =~ s/CVS$//;
+	while (<ENTRIES>) {
+	    if (m#^D/([^/]+)/#) {
+		push @cvsdirs, "$path$1/CVS";
+		next;
+	    }
+	    next unless my($fn, $rev, $date) = (split(m#/#))[1..3];
+	    next if $rev eq '';
+	    my $mtime = (stat("$path$fn"))[9];
+	    my $etime = str2time($date . ' UTC') || -1;
+	    if ($rev eq '0') {
+		push @changes, "A $path$fn\n";
+	    } elsif (!defined($mtime)) {
+		push @changes, "0 $path$fn\n";
+	    } elsif ($date =~ /\+/) {
+		push @changes, "C $path$fn\n";
+	    } elsif ($mtime != $etime) {
+		push @changes, "M $path$fn\n";
+	    }
+	}
+	close ENTRIES;
+    }
+    print sort @changes;
+} else {
+    my $dir = '';
+    open CVS, '-|', 'cvs status 2>&1' or die $!;
+    while (<CVS>) {
+	if (/sufficient access to |cvs \[status aborted\]/) {
+	    print "ERROR: ", $_;
+	    next;
+	}
+	if (/^\? /) {
+	    print $_;
+	    next;
+	}
+	next unless m#(status|server):\sExamining
+		     |(Status|RCS\sVersion|Repository\srevision):#x;
+	if (/: Examining (.*)/) {
+	    $dir = $1 eq '.' ? '' : "$1/";
+	} elsif (/File: (.*?)\s+Status: (.*?)\s+\z/) {
+	    my($fn, $status) = ($1, $2);
+	    next if $status eq 'Up-to-date';
+	    if ($status =~ /locally modified/i) {
+		print "M $dir$fn\n";
+	    } elsif ($status =~ /locally added/i) {
+		print "A $dir$fn\n";
+	    } elsif ($status =~ /needs patch/i) {
+		print "U $dir$fn\n";
+	    } elsif ($status =~ /needs merge|conflicts on merge/i) {
+		print "C $dir$fn\n";
+	    } elsif ($status =~ /needs checkout/i) {
+		$fn =~ s/^no file //;
+		print "0 $dir$fn\n";
+	    } else {
+		die "Unknown status: $status\n";
+	    }
+	}
+    }
+    close CVS;
+}

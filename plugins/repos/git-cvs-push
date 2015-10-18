@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $git_dir = shift;
+
+die "Usage: cvs-push-git GIT_DIR [FILES]" unless defined $git_dir && -d "$git_dir/.git";
+
+my $cvs_repo = "$git_dir/.git/cvs";
+die "No cvs dir found in $git_dir/.git" unless -d $cvs_repo;
+
+my $commit_symlink = "$cvs_repo/.commit";
+
+my $origin_commit;
+$_ = `git log -1 origin`;
+if (/^commit (\S+)/) {
+    $origin_commit = $1;
+} else {
+    die "Unable to parse origin commit from git log output.\n";
+}
+
+unless (@ARGV) {
+    my $prev_commit = readlink $commit_symlink;
+    $prev_commit = '' unless defined $prev_commit;
+
+    chomp(my $user = `git config user.name`);
+    die "Git user is not set.\n" unless $user =~ /\S/;
+
+    my $commit;
+    open PIPE, '-|', qw( git log -30 ) or die $!;
+    while (<PIPE>) {
+	if (/^commit (\S+)/) {
+	    $commit = $1;
+	    last if $commit eq $prev_commit || $commit eq $origin_commit;
+	} elsif (/^Author:/) {
+	    last unless /\Q$user\E/o;
+	    unshift @ARGV, $commit;
+	}
+    }
+    close PIPE;
+}
+
+die "Nothing to push.\n" unless @ARGV;
+
+foreach (@ARGV) {
+    unlink $commit_symlink;
+    symlink $_, $commit_symlink;
+    print '=' x 20, " $_ ", '=' x 20, "\n";
+    system qw( git cvsexportcommit -c -u -p -w ), $cvs_repo, $_ and exit 1;
+}
