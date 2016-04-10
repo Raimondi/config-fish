@@ -88,7 +88,7 @@ function colorscheme --description "Set fish color variables according to the gi
       if test $colorc -ge 7
         set error $colors[7]
       else
-        set error $colors[1]
+        set error $colors[2]
       end
       if test $colorc -ge 8
         set normal $colors[8]
@@ -100,11 +100,11 @@ function colorscheme --description "Set fish color variables according to the gi
 
       set -g fish_color_history_current   "$color"
       set -g fish_color_cwd_root          "$color"
-      set -g fish_color_quote             "$color"
 
       # Color 2
       set color $colors[2]
 
+      set -g fish_color_quote             "$color"
       set -g fish_color_match             "$color"
       set -g fish_color_redirection       "$color"
       set -g fish_color_operator          "$color"

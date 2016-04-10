@@ -29,8 +29,6 @@ if not set -q -g fish_user_abbreviations
   set -gx fish_user_abbreviations
 end
 
-abbr -a l="ls -Alh"
-
 # XQuartz libs are not in the usual place.
 set -xg CPLUS_INCLUDE_PATH /usr/X11R6/include
 
@@ -89,11 +87,13 @@ if type -f fortune >/dev/null ^/dev/null
   if type -f lolcat >/dev/null ^/dev/null
     set fortune "$fortune | lolcat"
   end
-  eval $fortune
-  echo
+  #eval $fortune
+  #echo
 end
 
-function rationalise_dot
+abbr -a l="ls -Alh"
+
+function rationalize_dot
   if commandline -t | grep -q '\(^\|/\)\.\.$'
     commandline -i /..
   else
@@ -101,6 +101,14 @@ function rationalise_dot
   end
 end
 
+function colon2vim
+  if commandline -b | grep -q '^$'
+    commandline -i "vim "
+  else
+    commandline -i :
+  end
+end
+
 history --merge > /dev/null
-eval (python -m virtualfish)
+#eval (python -m virtualfish)
 source /Users/israel/.iterm2_shell_integration.fish
