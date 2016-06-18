@@ -28,7 +28,8 @@ end
 if not set -q -g fish_user_abbreviations
   set -gx fish_user_abbreviations
 end
-
+set -xg LUA_PATH "/opt/local/share/luarocks/share/lua/5.3/?.lua;/opt/local/share/luarocks/share/lua/5.3/?/init.lua;$LUA_PATH"
+set -xg LUA_CPATH "/opt/local/share/luarocks/lib/lua/5.3/?.so;$LUA_CPATH"
 # XQuartz libs are not in the usual place.
 set -xg CPLUS_INCLUDE_PATH /usr/X11R6/include
 
@@ -109,6 +110,16 @@ function colon2vim
   end
 end
 
-history --merge > /dev/null
-#eval (python -m virtualfish)
-source /Users/israel/.iterm2_shell_integration.fish
+function sync_history -e fish_prompt
+  history --merge > /dev/null
+end
+
+function sudo-my-prompt
+  set -l cmd (commandline)
+  commandline --replace "sudo $cmd"
+end
+
+##eval (python -m virtualfish)
+#if test "$TERM_PROGRAM" = "iTerm.app"
+#  source /Users/israel/.iterm2_shell_integration.fish
+#end

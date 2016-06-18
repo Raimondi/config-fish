@@ -7,16 +7,11 @@ function showcase -d 'Create a showcase of the current color theme.'
          | string replace -r -a "[[:cntrl:]]" ""
     end
   end
-  if not functions -q __showcase_print
+  if not functions -q __showcase_print normal " "
     function __showcase_print -a color text
-      if test (count $argv) -eq 0
-        set_color normal
-        printf " "
-      else
-        set_color normal
-        eval "set_color $color"
-        printf $text
-      end
+      set_color normal
+      eval "set_color $color"
+      printf $text
     end
   end
   if not functions -q __showcase_prompt
@@ -24,7 +19,6 @@ function showcase -d 'Create a showcase of the current color theme.'
       set -l output
       set -l padding
       set -l rprompt
-      set -l rtext
       stty size | read rows cols
       set_color normal
       if functions -q fish_prompt
@@ -35,9 +29,9 @@ function showcase -d 'Create a showcase of the current color theme.'
       if functions -q fish_right_prompt
         set rprompt (fish_right_prompt | tr -d '\\n')
       end
-      set rtext (__showcase_clean "$rprompt")
-      set text_length (string length "$ltext$rtext")
-      set pad_length (math $cols - $text_length)
+      set -l rtext (__showcase_clean "$rprompt")
+      set -l text_length (string length "$ltext$rtext")
+      set -l pad_length (math $cols - $text_length)
       if test "$pad_length" -gt 0
         set padding (printf "%"$pad_length"s" "")
         set output[-1] "$output[-1]$padding"
@@ -51,6 +45,7 @@ function showcase -d 'Create a showcase of the current color theme.'
 
   set -l title_color "green --bold"
   stty size | read rows cols
+
   __showcase_print "green --bold" "\nStart of showcase"
 
   # Incomplete command
@@ -64,21 +59,21 @@ function showcase -d 'Create a showcase of the current color theme.'
   set_color $fish_color_param
   set_color $fish_color_valid_path
   printf "a/valid/path"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_param" "another_argument\n")
 
   # Autosuggestion
   __showcase_print "$title_color" "\nAutosuggestion\n\n"
   __showcase_prompt (__showcase_print "$fish_color_command" "git"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_autosuggestion" "status\n")
 
   # Completion pager
   __showcase_print "$title_color" "\nThe completion pager\n\n"
   __showcase_prompt (__showcase_print "$fish_color_command" "git"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_param" "checkout"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_param" "v7-\n")
 
   # Print the pager
@@ -122,25 +117,25 @@ function showcase -d 'Create a showcase of the current color theme.'
   # Complex command
   __showcase_print "$title_color" "\nA bit more complex command\n\n"
   __showcase_prompt (__showcase_print "$fish_color_command" "printf"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_quote" "\"foo %%s\\\n\""
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_match" "("
   __showcase_print "$fish_color_command" "echo"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_param" "\$bar"
   __showcase_print "$fish_color_match" ")"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_redirection" "^"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_redirection" "/dev/null"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_end" "|"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_command" "tr"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_quote" "\" \""
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_escape" "\\\\t\n")
 
   # Root user
@@ -149,9 +144,9 @@ function showcase -d 'Create a showcase of the current color theme.'
   set -l current_user $USER
   set -gx USER root
   __showcase_prompt (__showcase_print "$fish_color_command" "git"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_param" "status"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_comment" "# this is a nice comment :D\n")
   set -gx USER $current_user
 
@@ -165,7 +160,7 @@ function showcase -d 'Create a showcase of the current color theme.'
   printf " "
   set_color "$fish_color_param"
   printf "fetch"
-  __showcase_print
+  __showcase_print normal " "
   __showcase_print "$fish_color_param" "upstream")
 
   __showcase_print "$title_color" "\n\n~~~~~~~~~\n"
