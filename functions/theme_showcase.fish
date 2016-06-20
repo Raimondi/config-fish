@@ -7,6 +7,11 @@ function theme_showcase -d 'Create a showcase of the current color theme.'
          | string replace -r -a "[[:cntrl:]]" ""
     end
   end
+  if not functions -q __theme_showcase_status
+    function __theme_showcase_status -a exit_status
+      return $exit_status
+    end
+  end
   if not functions -q __theme_showcase_print
     function __theme_showcase_print -a color text
       set_color normal
@@ -14,21 +19,35 @@ function theme_showcase -d 'Create a showcase of the current color theme.'
       printf $text
     end
   end
-  if not functions -q __theme_showcase_prompt
-    function __theme_showcase_prompt -a text
+  #if not functions -q __theme_showcase_prompt
+    function __theme_showcase_prompt -a exit_status jobs text
       # Print the left prompt and the given text, if there is enough space
-      # print the right prompt.
-      set -l output
+      # left then print the right prompt.
+      set -l prompt
       set -l padding
       set -l rprompt
+      set -l job_ids
+      set -l job_template "vi theme_showcase_foo_bar_baz_%s_%s >/dev/null ^&1 &"
+      if test -n "$jobs" -a "$jobs" -gt 0
+        set job_ids (seq $jobs)
+      end
       stty size | read rows cols
+      # Add some jobs in case the prompt uses them
+      for job_id in $job_ids
+        eval (printf $job_template inactive $job_id)
+        kill -SIGSTOP %(printf $job_template inactive $job_id)
+        eval (printf $job_template active $job_id)
+      end
       set_color normal
       if functions -q fish_prompt
-        set output (fish_prompt)
+        __theme_showcase_status $exit_status
+        set prompt (fish_prompt)
       end
-      set output[-1] "$output[-1]$text"
-      set ltext (__theme_showcase_clean "$output[-1]")
+      # Left prompt could be multiline, append to the last line only
+      set prompt[-1] "$prompt[-1]$text"
+      set ltext (__theme_showcase_clean "$prompt[-1]")
       if functions -q fish_right_prompt
+        __theme_showcase_status $exit_status
         set rprompt (fish_right_prompt | tr -d '\\n')
       end
       set -l rtext (__theme_showcase_clean "$rprompt")
@@ -36,62 +55,90 @@ function theme_showcase -d 'Create a showcase of the current color theme.'
       set -l pad_length (math $cols - $text_length)
       if test "$pad_length" -gt 0
         set padding (printf "%"$pad_length"s" "")
-        set output[-1] "$output[-1]$padding"
-        set output[-1] "$output[-1]$rprompt"
+        set prompt[-1] "$prompt[-1]$padding"
+        set prompt[-1] "$prompt[-1]$rprompt"
       end
-      for line in $output
+      for line in $prompt
         echo $line
       end
+      # Now remove the jobs
+      for job_id in $job_ids
+        kill -9 %(printf $job_template active $job_id)
+        kill -9 %(printf $job_template inactive $job_id)
+      end
     end
-  end
+  #end
 
   set -l title_color "$fish_color_comment --bold"
   stty size | read rows cols
 
-  printf "\
+  printf '
+Showcase the current color theme.
+
 The following cases are showcased:
 
-- Full command:
-  > man 7 re_format
+- Empty prompt:
+  $
+- Command with argument and autosuggestion (as if the cursor were at the |):
+  $ man 7 re_|format
 - Command with a valid path and an invalid path:
-  > multitail valid/path.log invalid/path.log
+  $ multitail valid/path.log invalid/path.log
+- Empty prompt showing non zero exit status and some jobs on the background:
+  $
 - Incomplete command (error) and autosuggestion (as if the cursor were at the |):
-  > wee|chat
+  $ wee|chat
 - Completion pager:
-  > git checkout v7.2.250
+  $ git checkout v7.2.250
 - A more complex command:
-  > printf \"foo %s\\\\n\" (echo \$bar) ^ /dev/null | tr \" \" \\\\t
+  $ printf "foo %%s\\\\n" (echo $bar) ^ /dev/null | tr " " \\\\t
 - As root, a command and a comment (works if $USER is used to detect root user):
-  > make install # this is a nice comment
+  $ make install # this is a nice comment
 - Search match (as if the cursor were at the |):
-  > apt-get ins|tall vim-nox\n\n"
+  $ apt-get ins|tall vim-nox
+
+'
+
+  # Empty prompt
+  __theme_showcase_prompt
 
   # Complete command
-  __theme_showcase_prompt (__theme_showcase_print "$fish_color_command" "man"
+  __theme_showcase_prompt 0 0 (
+  __theme_showcase_print "$fish_color_command" "man"
   __theme_showcase_print normal " "
   __theme_showcase_print "$fish_color_param" "7"
   __theme_showcase_print normal " "
-  __theme_showcase_print "$fish_color_param" "re_format")
+  __theme_showcase_print "$fish_color_param" "re_"
+  __theme_showcase_print "$fish_color_autosuggestion" "format"
+  )
 
   # Command plus two arguments, one of them is a valid path
-  __theme_showcase_prompt (__theme_showcase_print "$fish_color_command" "multitail"
+  __theme_showcase_prompt 0 0 (
+  __theme_showcase_print "$fish_color_command" "multitail"
   __theme_showcase_print normal " "
   set_color $fish_color_param
   set_color $fish_color_valid_path
   printf "valid/path.log"
   __theme_showcase_print normal " "
-  __theme_showcase_print "$fish_color_param" "invalid/path.log\n")
+  __theme_showcase_print "$fish_color_param" "invalid/path.log\n"
+  )
+
+  # Empty prompt
+  __theme_showcase_prompt 130 2
 
   # Incomplete command with autosuggestion
-  __theme_showcase_prompt (__theme_showcase_print "$fish_color_error" "wee"
-  __theme_showcase_print "$fish_color_autosuggestion" "chat")
+  __theme_showcase_prompt 0 3 (
+  __theme_showcase_print "$fish_color_error" "wee"
+  __theme_showcase_print "$fish_color_autosuggestion" "chat"
+  )
 
   # Completion pager
-  __theme_showcase_prompt (__theme_showcase_print "$fish_color_command" "git"
+  __theme_showcase_prompt 1 0 (
+  __theme_showcase_print "$fish_color_command" "git"
   __theme_showcase_print normal " "
   __theme_showcase_print "$fish_color_param" "checkout"
   __theme_showcase_print normal " "
-  __theme_showcase_print "$fish_color_param" "v7.2.250\n")
+  __theme_showcase_print "$fish_color_param" "v7.2.250\n"
+  )
 
   # Print the pager
   set -l length 17
@@ -132,7 +179,8 @@ The following cases are showcased:
   __theme_showcase_print "$fish_pager_color_progress" "…and 861 more rows\n"
 
   # Complex command
-  __theme_showcase_prompt (__theme_showcase_print "$fish_color_command" "printf"
+  __theme_showcase_prompt 0 0 (
+  __theme_showcase_print "$fish_color_command" "printf"
   __theme_showcase_print normal " "
   __theme_showcase_print "$fish_color_quote" "\"foo %%s\\\n\""
   __theme_showcase_print normal " "
@@ -152,21 +200,25 @@ The following cases are showcased:
   __theme_showcase_print normal " "
   __theme_showcase_print "$fish_color_quote" "\" \""
   __theme_showcase_print normal " "
-  __theme_showcase_print "$fish_color_escape" "\\\\t\n")
+  __theme_showcase_print "$fish_color_escape" "\\\\t\n"
+  )
 
   # Root user
   # This relies on fish_prompt using $USER to change colors.
   set -l current_user $USER
   set -gx USER root
-  __theme_showcase_prompt (__theme_showcase_print "$fish_color_command" "make"
+  __theme_showcase_prompt 0 0 (
+  __theme_showcase_print "$fish_color_command" "make"
   __theme_showcase_print normal " "
   __theme_showcase_print "$fish_color_param" "install"
   __theme_showcase_print normal " "
-  __theme_showcase_print "$fish_color_comment" "# this is a nice comment :D\n")
+  __theme_showcase_print "$fish_color_comment" "# this is a nice comment :D\n"
+  )
   set -gx USER $current_user
 
   # History search
-  __theme_showcase_prompt (set_color "$fish_color_search_match"
+  __theme_showcase_prompt 2 0 (
+  set_color "$fish_color_search_match"
   set_color "$fish_color_command"
   printf "apt-get"
   printf " "
@@ -174,5 +226,6 @@ The following cases are showcased:
   printf "ins"
   __theme_showcase_print "$fish_color_param" "tall"
   __theme_showcase_print normal " "
-  __theme_showcase_print "$fish_color_param" "vim-nox")
+  __theme_showcase_print "$fish_color_param" "vim-nox"
+  )
 end
