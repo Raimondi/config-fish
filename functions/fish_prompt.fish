@@ -16,19 +16,17 @@ function fish_prompt --description 'Write out the left prompt'
   set -l status_c $fish_color_status
 
   # Git prompt
-  if not set -q __fish_git_prompt_color
-    set -g __fish_git_prompt_color			"$normal_c"
-    set -g __fish_git_prompt_color_flags		"$normal_c"
-    set -g __fish_git_prompt_color_prefix		"$filler_c"
-    set -g __fish_git_prompt_color_suffix		"$filler_c"
-    #set -g __fish_git_prompt_color_bare			"$filler_c"
-    #set -g __fish_git_prompt_color_merging		"$filler_c"
-    #set -g __fish_git_prompt_color_branch		"$filler_c"
-    #set -g __fish_git_prompt_color_branch_detached	"$filler_c"
-    #set -g __fish_git_prompt_color_dirtystate		"$filler_c"
-    #set -g __fish_git_prompt_color_stagedstate		"$filler_c"
-    #set -g __fish_git_prompt_color_upstream		"$filler_c"
-  end
+  set -g __fish_git_prompt_color			"$normal_c"
+  set -g __fish_git_prompt_color_flags		"$normal_c"
+  set -g __fish_git_prompt_color_prefix		"$filler_c"
+  set -g __fish_git_prompt_color_suffix		"$filler_c"
+  #set -g __fish_git_prompt_color_bare			"$filler_c"
+  #set -g __fish_git_prompt_color_merging		"$filler_c"
+  #set -g __fish_git_prompt_color_branch		"$filler_c"
+  #set -g __fish_git_prompt_color_branch_detached	"$filler_c"
+  #set -g __fish_git_prompt_color_dirtystate		"$filler_c"
+  #set -g __fish_git_prompt_color_stagedstate		"$filler_c"
+  #set -g __fish_git_prompt_color_upstream		"$filler_c"
 
   # Just calculate these once, to save a few cycles when displaying the prompt
   if not set -q __fish_prompt_hostname
