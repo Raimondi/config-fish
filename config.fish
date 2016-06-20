@@ -1,23 +1,10 @@
-# Path to your oh-my-fish.
-#set fish_path $HOME/.oh-my-fish
-
-# Path to your custom folder (default path is ~/.oh-my-fish/custom)
-#set fish_custom $HOME/dotfiles/oh-my-fish
-
-# Load oh-my-fish configuration.
-#source $fish_path/oh-my-fish.fish
-
-# Custom plugins and themes may be added to ~/.oh-my-fish/custom
-# Plugins and themes can be found at https://github.com/oh-my-fish/
-#Theme 'robbyrussell'
-
-umask 0027
+#umask 0027
 
 set -xg EDITOR vim
 set -xg VISUAL vim
 set -xg PAGER "less -X"
 set -xg fish_user_paths ~/bin
-set -xg VIDIR_EDITOR_ARGS '-c :set nolist | :set ft=vidir-ls'
+set -xg VIDIR_EDITOR_ARGS '-c "set nolist ft=vidir-ls"'
 set -xg CDPATH . ~
 if test -d ~/Documents/Source
   set CDPATH $CDPATH ~/Documents/Source
@@ -89,6 +76,9 @@ source "$plugin_dir/fbell.fish"
 #colorscheme 53777A 542437 C02942 D95B43 ECD078
 colorscheme 53777A D95B43 C02942 542437 ECD078
 
+# http://www.colourlovers.com/palette/123774/Homage_to_the_Chefs
+#colorscheme FFF2AF D31900 7CB490 FF6600
+
 if type -f fortune >/dev/null ^/dev/null
   set -l fortune "fortune -a"
   if type -f cowsay >/dev/null ^/dev/null
@@ -112,9 +102,9 @@ function rationalize_dot
   end
 end
 
-function colon2vim
+function colon2x
   if commandline -b | grep -q '^$'
-    commandline -i "vim "
+    commandline -i ""
   else
     commandline -i :
   end
@@ -151,7 +141,6 @@ set -g __fish_git_prompt_show_informative_status	true
 #set -g __fish_git_prompt_char_cleanstate		'√'
 set -g __fish_git_prompt_char_stateseparator		' '
 
-##eval (python -m virtualfish)
 #if test "$TERM_PROGRAM" = "iTerm.app"
 #  source /Users/israel/.iterm2_shell_integration.fish
 #end
