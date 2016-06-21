@@ -210,6 +210,8 @@ When colors are provided for preview or list, the given colors are used.
         theme_showcase
       else
         echo
+        echo "theme_showcase is required to showcase the prompt with the current colors."
+        echo
       end
   end
   if begin

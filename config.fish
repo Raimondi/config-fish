@@ -4,7 +4,7 @@ set -xg EDITOR vim
 set -xg VISUAL vim
 set -xg PAGER "less -X"
 set -xg fish_user_paths ~/bin
-set -xg VIDIR_EDITOR_ARGS '-c "set nolist ft=vidir-ls"'
+set -xg VIDIR_EDITOR_ARGS '-c :set nolist ft=vidir-ls'
 set -xg CDPATH . ~
 if test -d ~/Documents/Source
   set CDPATH $CDPATH ~/Documents/Source

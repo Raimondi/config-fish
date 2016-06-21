@@ -6,8 +6,9 @@
 # This script was inspired by Jean-Philippe Ouellet's zbell.zsh
 # (https://gist.github.com/oknowton/8346801)
 #
-# Configuration:
+# Configuration
 #
+# General:
 # - fbell_time_limit: minimum time in seconds that a command runs to trigger
 #   an action.
 # - fbell_ignored: space delimited list of commands to ignore. e.g. vim, less,
@@ -15,14 +16,17 @@
 # - fbell_actions: a space delimited list of actions to perform, available
 #   actions are: bell sound email command.
 #
+# Bell action:
 # - fbell_bell_times: how many times the bell will ring.
 #
+# Sound action:
 # - fbell_sound_player: command that will play the sound file.
 # - fbell_sound_file: file that will be played.
 #
-# - fbell_command: string with a command that will be passed to the eval
-#   command.
+# Eval action:
+# - fbell_eval_string: string that will be passed to eval.
 #
+# Email action:
 # - fbell_email_server: smtp server.
 # - fbell_email_port: smtp server port.
 # - fbell_email_user: user for the smtp server.
@@ -46,7 +50,8 @@ function __fbell_after -e fish_postexec
      $EDITOR $PAGER watch htop top ssh iotop dstat vmstat nano emacs vi bwm-ng \
      less more fdisk audacious play aplay sqlite3 wine mtr ping traceroute vlc \
      mplayer smplayer tail tmux screen man sawfish-config powertop g vim yi xi \
-     mvim gvim afplay pico lynx w3m elinks newsbeuter mutt nvim weechat irssi
+     mvim gvim afplay pico lynx w3m elinks newsbeuter mutt nvim weechat irssi \
+     fish_config vidir ranger
   set -l command (echo "$argv" | sed -E -e 's-^ *(sudo *)?([^ ]+).*-\2-')
   if set -q fbell_actions
     set actions $fbell_actions
@@ -71,7 +76,7 @@ function __fbell_after -e fish_postexec
   end
   if contains command $actions
     # Run some command.
-    __fbell_command $command $exit_status "$argv"
+    __fbell_eval $command $exit_status "$argv"
   end
   if contains email $actions
     # Send an email
@@ -101,12 +106,12 @@ function __fbell_sound
   eval "$command $file" >/dev/null ^&1 &
 end
 
-function __fbell_command -a command exit_status commandline
-  set -l command 'say "$command has finished with exit status $exit_status."'
-  if set -q fbell_command
-    set command $fbell_command
+function __fbell_eval -a command exit_status commandline
+  set -l string 'say "$command has finished with exit status $exit_status."'
+  if set -q fbell_eval_string
+    set string $fbell_eval_string
   end
-  eval "$command" >/dev/null ^&1 &
+  eval "$string"
 end
 
 function __fbell_email -a command exit_status
