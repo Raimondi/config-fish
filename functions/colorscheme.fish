@@ -45,6 +45,7 @@ When colors are provided for preview or list, the given colors are used.
      "fish_pager_color_progress" \
      "fish_pager_color_secondary"
 
+  # Argument parsing
   if test $argc -gt 0
     for i in (seq $argc)
       switch $argv[$i]
