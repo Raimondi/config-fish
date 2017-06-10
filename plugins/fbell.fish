@@ -51,8 +51,8 @@ function __fbell_after -e fish_postexec
      less more fdisk audacious play aplay sqlite3 wine mtr ping traceroute vlc \
      mplayer smplayer tail tmux screen man sawfish-config powertop g vim yi xi \
      mvim gvim afplay pico lynx w3m elinks newsbeuter mutt nvim weechat irssi \
-     fish_config vidir ranger
-  set -l command (echo "$argv" | sed -E -e 's-^ *(sudo *)?([^ ]+).*-\2-')
+     fish_config funced vared vidir ranger
+  set -l command (echo "$argv" | sed -E -e 's-^ *(sudo +)?(.*\| *)?([^ ]+).*-\3-' -e 's/\.\///' )
   if set -q fbell_actions
     set actions $fbell_actions
   end
@@ -62,7 +62,7 @@ function __fbell_after -e fish_postexec
   # Check if command qualifies
   if begin
       test "$run_time" -lt "$time_limit"
-      or contains $command $ignored
+      or contains -- $command $ignored
     end
     return
   end
@@ -103,7 +103,7 @@ function __fbell_sound
   if set -q fbell_sound_file
     set file $fbell_sound_file
   end
-  eval "$command $file" >/dev/null ^&1 &
+  eval "$command \"$file\"" >/dev/null ^&1
 end
 
 function __fbell_eval -a command exit_status commandline

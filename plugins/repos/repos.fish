@@ -74,7 +74,14 @@ function repos_fish_setup -d "Set fish_repos abbreviations up."
 
   set -l prior_inode
   set -l check_dir .
-  set -l inode (stat -c \%i $check_dir)
+  if type gstat >/dev/null
+    set gstat true
+  end
+  if test -n "$gstat"
+    set inode (gstat -c \%i $check_dir)
+  else
+    set inode (stat -c \%i $check_dir)
+  end
 
   for name in ad ci co di lo pu st up ss
     abbr -a $$name='repos_fish_not_in_a_VCS_directory'
@@ -92,7 +99,7 @@ function repos_fish_setup -d "Set fish_repos abbreviations up."
       abbr -a $ci='git commit'
       #abbr -a $ci='git4commit commit'
       abbr -a $co='git checkout'
-      abbr -a $di='git diff --patience --word-diff=color --no-ext-diff -w'
+      abbr -a $di='git diff --patience --color --no-ext-diff -w'
       abbr -a $lo='git4log log --patience -cc'
       abbr -a $st='git status'
       if test -f $check_dir/.git/svn/.metadata
@@ -101,11 +108,11 @@ function repos_fish_setup -d "Set fish_repos abbreviations up."
         set -g REPOS_FISH_TYPE git-svn
       else if test -d $check_dir/.git/cvs
         abbr -a $pu="git-cvs-push '$check_dir'"
-        abbr -a $up='git pull --rebase --stat'
+        abbr -a $up='git pull --rebase --autostash --stat'
         set -g REPOS_FISH_TYPE git-cvs
       else
         abbr -a $pu='git push'
-        abbr -a $up='git pull --rebase --stat'
+        abbr -a $up='git pull --rebase --autostash --stat'
         set -g REPOS_FISH_TYPE git
       end
       abbr -a $ss='git stash'
@@ -168,7 +175,11 @@ function repos_fish_setup -d "Set fish_repos abbreviations up."
     end
     set prior_inode $inode
     set check_dir ../$check_dir
-    set inode (stat -c \%i $check_dir)
+    if test -n "$gstat"
+      set inode (gstat -c \%i $check_dir)
+    else
+      set inode (stat -c \%i $check_dir)
+    end
   end
   return 0
 end
@@ -180,7 +191,7 @@ for cmd in cvs svn bzr hg
   end"
 end
 
-function -d "Not in a VCS directory" repos_fish_not_in_a_VCS_directory
+function repos_fish_not_in_a_VCS_directory -d "Not in a VCS directory"
   echo 'repos: not in a VCS directory' >&2
 end
 
@@ -228,7 +239,11 @@ function repos_fish_postexec -e fish_postexec -d 'Check if repo has been "init"e
 end
 
 function repos_fish_pwd -v PWD -d 'Change of directory, check if a VCS repo.'
-  set -l inode (stat -c \%i .)
+  if type gstat >/dev/null
+    set inode (gstat -c \%i .)
+  else
+    set inode (stat -c \%i .)
+  end
   if test "$REPOS_FISH_INODE" != "$inode"
     repos_fish_setup
     set -g REPOS_FISH_INODE $inode

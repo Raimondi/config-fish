@@ -1,11 +1,4 @@
 function fish_prompt --description 'Write out the left prompt'
-
-  set -l last_status $status
-  set -l nest_lvl
-  set -l item_prefix
-  set -l item_sufix
-  set -l delim
-
   # Setup colors
   set -l normal_c $fish_color_normal
   set -l filler_c $fish_color_cwd_root
@@ -27,6 +20,17 @@ function fish_prompt --description 'Write out the left prompt'
   #set -g __fish_git_prompt_color_dirtystate		"$filler_c"
   #set -g __fish_git_prompt_color_stagedstate		"$filler_c"
   #set -g __fish_git_prompt_color_upstream		"$filler_c"
+
+  set template '{sudo?\(sudo\)}{su?\(su\)}(user)@(host)\:(cwd){cwdwrite:(c:error) !(c:auto)}{git? | (git)}{jobs? | (c:user)jobs\:(c:auto )(jobs)}\n{status?(c:status)exit status\: (status)(c:auto) }{root?#:>} '
+  if prompter "$template"
+    return 0
+  end
+
+  set -l last_status $status
+  set -l nest_lvl
+  set -l item_prefix
+  set -l item_sufix
+  set -l delim
 
   # Just calculate these once, to save a few cycles when displaying the prompt
   if not set -q __fish_prompt_hostname
@@ -93,7 +97,7 @@ function fish_prompt --description 'Write out the left prompt'
     end
   end
 
-  # Handle root user
+
   switch $USER
     case root
       set user_c "-b $normal_c $root_c "
@@ -131,7 +135,12 @@ function fish_prompt --description 'Write out the left prompt'
   __fish_prompt_cond "test $last_status -ne 0" "$last_status" "$status_c"
 
   # Print fish nested level if greater than 1
-  __fish_prompt_cond "test $SHLVL -gt 1" "><> $SHLVL" "$normal_c"
+  if test -n "$TMUX"
+    set nest_lvl (math $SHLVL - 2)
+  else
+    set nest_lvl (math $SHLVL - 1)
+  end
+  __fish_prompt_cond "test $nest_lvl -gt 0" "><> $nest_lvl" "$normal_c"
 
   # virtualenv
   __fish_prompt_cond "set -q VIRTUAL_ENV" (basename "$VIRTUAL_ENV") "$normal_c"
@@ -139,7 +148,7 @@ function fish_prompt --description 'Write out the left prompt'
   # number of jobs:  \o/ 3 o+< 2
   set -l act_lbl "\o/"
   set -l stp_lbl "o+<"
-  set -l jobs_lbl "jobs: "
+  set -l job_lbl "jobs: "
   set -l all_jobs (count (jobs))
   set -l act_jobs (count (jobs | grep running))
   set -l stp_jobs (count (jobs | grep stopped))

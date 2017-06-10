@@ -4,3 +4,5 @@ function fish_user_key_bindings
   bind \cx edit_commandline
   bind \cs sudo-my-prompt
 end
+
+#fzf_key_bindings

@@ -178,8 +178,12 @@ The following cases are showcased with the long format:
       echo
     else
       if not functions -q $saved_lprompt
-        functions -c fish_prompt $saved_lprompt
-        functions -c fish_right_prompt $saved_rprompt
+        if functions -q fish_prompt
+          functions -c fish_prompt $saved_lprompt
+        end
+        if functions -q fish_right_prompt
+          functions -c fish_right_prompt $saved_rprompt
+        end
         function fish_right_prompt
         end
       end
@@ -354,8 +358,8 @@ The following cases are showcased with the long format:
 
       # History search
       __theme_showcase_prompt 2 0 (
-        set_color "$fish_color_search_match"
-        set_color "$fish_color_command"
+        eval "set_color $fish_color_search_match"
+        eval "set_color $fish_color_command"
         printf "apt-get"
         printf " "
         set_color "$fish_color_param"

@@ -16,12 +16,12 @@ function __colorscheme_set -d 'Auxiliary function for colorscheme, duh!'
       set -g fish_pager_color_completion  $color
       set color $argv[3]
       set -g fish_color_quote             $color
+      set -g fish_color_escape            $color
       set -g fish_color_match             $color
       set -g fish_color_history_current   $color
       set -g fish_color_cwd_root          $color
       set -g fish_pager_color_prefix      $color
       set color $argv[4]
-      set -g fish_color_escape            $color
       set -g fish_color_autosuggestion    $color
       set -g fish_color_comment           $color
       set color $argv[5]
@@ -49,13 +49,13 @@ function __colorscheme_set -d 'Auxiliary function for colorscheme, duh!'
       set -g fish_pager_color_completion  $color
       set color $argv[3]
       set -g fish_color_quote             $color
+      set -g fish_color_escape            $color
       set -g fish_color_match             $color
       set -g fish_color_history_current   $color
       set -g fish_color_cwd_root          $color
       set -g fish_pager_color_prefix      $color
       set -g fish_color_autosuggestion    $color
       set color $argv[4]
-      set -g fish_color_escape            $color
       set -g fish_color_comment           $color
       set -g fish_color_end               $color
       set -g fish_color_status            $color
@@ -76,6 +76,7 @@ function __colorscheme_set -d 'Auxiliary function for colorscheme, duh!'
       set -g fish_color_param             $color
       set -g fish_color_quote             $color
       set -g fish_color_command           $color
+      set -g fish_color_escape            $color
       set color $argv[2]
       set -g fish_color_redirection       $color
       set -g fish_color_operator          $color
@@ -87,7 +88,6 @@ function __colorscheme_set -d 'Auxiliary function for colorscheme, duh!'
       set -g fish_color_match             $color
       set -g fish_color_history_current   $color
       set -g fish_color_cwd_root          $color
-      set -g fish_color_escape            $color
       set -g fish_color_comment           $color
       set -g fish_color_status            $color
       set -g fish_pager_color_secondary   $color
