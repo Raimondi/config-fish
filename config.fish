@@ -37,7 +37,6 @@ for dir in                                                        \
 end
 set -e temp_path
 
-source ~/.config/fish/nix.fish
 if set -q -U fish_user_abbreviations
   set -e -U fish_user_abbreviations
 end
@@ -84,7 +83,7 @@ end
 
 set -l plugin_dir ~/.config/fish/plugins
 
-source "$plugin_dir/z-fish/z.fish"
+#source "$plugin_dir/z-fish/z.fish"
 source "$plugin_dir/repos/repos.fish"
 source "$plugin_dir/cd_on_error.fish"
 source "$plugin_dir/fbell.fish"
